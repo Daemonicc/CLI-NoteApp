@@ -2,6 +2,18 @@ const fs = require('fs');
 const path = require('path');
 const { askQuestions } = require('./questions');
 
+function getDirectories(path) {
+  return fs.readdirSync(path).filter(function (file) {
+    return fs.statSync(path + '/' + file).isDirectory();
+  });
+}
+
+function getFiles(path) {
+  return fs.readdirSync(path).filter(function (file) {
+    return !fs.statSync(path + '/' + file).isDirectory();
+  });
+}
+
 if (process.argv[2] === 'create') {
   if (process.argv[3] == 'category') {
     let category = '';
@@ -63,5 +75,45 @@ if (process.argv[2] === 'create') {
         }
       }
     });
+  }
+}
+
+if (process.argv[2] === 'list') {
+  if (process.argv[3] == 'category' && process.argv[4]) {
+    const files = getFiles(path.join(__dirname, process.argv[4]));
+
+    files.forEach((file) => {
+      console.log(file);
+    });
+  } else if (process.argv[3] == 'category') {
+    let directories = getDirectories(__dirname);
+    directories = directories.filter((dir) => {
+      if (!/^\..*/.test(dir)) {
+        return dir;
+      }
+    });
+
+    directories.forEach((directory) => {
+      console.log(directory);
+    });
+  } else if (process.argv[3] == 'notes') {
+    let results = [];
+    let directories = getDirectories(__dirname);
+    directories = directories.filter((dir) => {
+      if (!/^\..*/.test(dir)) {
+        return dir;
+      }
+    });
+    directories.forEach((directory) => {
+      const files = getFiles(path.join(__dirname, directory));
+
+      files.forEach((file) => {
+        results.push({
+          title: file,
+          category: directory,
+        });
+      });
+    });
+    console.table(results);
   }
 }
