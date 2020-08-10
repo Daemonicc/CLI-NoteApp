@@ -117,3 +117,39 @@ if (process.argv[2] === 'list') {
     console.table(results);
   }
 }
+
+if (process.argv[2] === 'read') {
+  let directories = getDirectories(__dirname);
+  directories = directories.filter((dir) => {
+    if (!/^\..*/.test(dir)) {
+      return dir;
+    }
+  });
+  let fileStatus = false;
+  directories.forEach((directory) => {
+    const filePath = path.join(__dirname, directory, process.argv[3]);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.readFile(filePath, { encoding: 'utf-8' }, function (err, data) {
+          if (!err) {
+            fileStatus = true;
+            console.log('Title: ' + process.argv[3]);
+            console.log('Category: ' + directory);
+            console.log('Body: ' + data);
+          } else {
+            console.log(err);
+          }
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  if (!fileStatus) {
+    console.error('Note not found');
+    console.warn(
+      'Use can use the list Note command to view the list of all saved notes'
+    );
+  }
+}
