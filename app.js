@@ -187,3 +187,46 @@ if (process.argv[2] === 'delete') {
     );
   }
 }
+
+if (process.argv[2] === 'edit') {
+  let title = process.argv[3];
+  let body = '';
+  let category = '';
+  let fileStatus = false;
+  let directories = getDirectories(__dirname);
+  directories = directories.filter((dir) => {
+    if (!/^\..*/.test(dir)) {
+      return dir;
+    }
+  });
+
+  directories.forEach((directory) => {
+    const filePath = path.join(__dirname, directory, process.argv[3]);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.readFile(filePath, { encoding: 'utf-8' }, async function (
+          err,
+          data
+        ) {
+          if (!err) {
+            console.log('Reading ' + `"${process.argv[3]}"` + ' : ' + data);
+            await askQuestions(['Enter new Note body: ']).then((answers) => {
+              body = answers[0];
+            });
+            var newValue = body;
+            fileStatus = true;
+            fs.writeFile(filePath, newValue, 'utf-8', function (err, data) {
+              if (err) throw err;
+              console.log('Note updated');
+            });
+          } else {
+            console.log(err);
+          }
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
