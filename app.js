@@ -153,3 +153,37 @@ if (process.argv[2] === 'read') {
     );
   }
 }
+
+if (process.argv[2] === 'delete') {
+  let directories = getDirectories(__dirname);
+  directories = directories.filter((dir) => {
+    if (!/^\..*/.test(dir)) {
+      return dir;
+    }
+  });
+  let fileStatus = false;
+  directories.forEach((directory) => {
+    const filePath = path.join(__dirname, directory, process.argv[3]);
+
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath, (err) => {
+          if (!err) {
+            fileStatus = true;
+            console.log(process.argv[3] + ' deleted successfully');
+          } else {
+            console.log(err);
+          }
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  if (!fileStatus) {
+    console.error('Note not found');
+    console.warn(
+      'Use can use the list Note command to view the list of all saved notes'
+    );
+  }
+}
